@@ -1,8 +1,8 @@
 # Caskoding
 
-CaskaydiaMono Nerd Font Mono 영문에 D2Coding 한글을 합친 터미널용 고정폭 폰트입니다.
+CaskaydiaMono Nerd Font와 D2Coding 한글을 하나로 합친 폰트입니다.
 
-한글 한 글자는 정확히 영문 두 칸을 차지하고, 크기는 D2Coding에서 영문과 한글이 이루는 비율 그대로입니다. 그래서 영문 폰트에 한글을 대체 폰트로 붙였을 때처럼 칸이 어긋나거나 한글만 커 보이지 않습니다. 영문, 숫자, 기호, Nerd Font 아이콘은 CaskaydiaMono 그대로입니다.
+영문 폰트에 한글 폰트를 따로 붙여 쓰면 한글만 크게 보이거나 줄이 어긋나곤 합니다. Caskoding은 한글을 처음부터 같은 폰트 안에 넣어서, 영문과 한글의 크기와 간격이 잘 맞습니다. 영문, 숫자, 기호, Nerd Font 아이콘은 CaskaydiaMono 그대로입니다.
 
 <!-- 스크린샷 자리 -->
 
