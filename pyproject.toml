@@ -1,7 +1,7 @@
 [project]
 name = "caskoding"
 version = "0.1.0"
-description = "CaskaydiaMono Nerd Font Mono with D2Coding Hangul at two-cell width."
+description = "CaskaydiaMono Nerd Font Mono with D2Coding Hangul, gaps filled from JuliaMono."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

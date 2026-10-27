@@ -1,9 +1,10 @@
-"""The twelve Caskoding styles and the upstream files each is built from."""
+"""The four Caskoding styles and the upstream files each is built from."""
 
 from dataclasses import dataclass
 
-WEIGHTS = ("ExtraLight", "Light", "SemiLight", "Regular", "SemiBold", "Bold")
-BOLD_HANGUL_WEIGHTS = ("SemiBold", "Bold")
+# Terminals and editors only use these four. D2Coding has just Regular and Bold,
+# so lighter or in-between weights would pair thin Latin with Regular Hangul.
+WEIGHTS = ("Regular", "Bold")
 
 
 @dataclass(frozen=True)
@@ -29,9 +30,13 @@ class Variant:
 
     @property
     def hangul_file(self) -> str:
-        if self.weight in BOLD_HANGUL_WEIGHTS:
+        if self.weight == "Bold":
             return "D2CodingBold-Ver1.4.0-20261003.ttf"
         return "D2Coding-Ver1.4.0-20261003.ttf"
+
+    @property
+    def symbols_file(self) -> str:
+        return f"JuliaMono-{self.weight}{'Italic' if self.italic else ''}.ttf"
 
 
 VARIANTS: tuple[Variant, ...] = tuple(

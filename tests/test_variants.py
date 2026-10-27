@@ -18,16 +18,17 @@ def _name(font: TTFont, name_id: int) -> str:
     return font["name"].getName(name_id, 3, 1, 0x409).toUnicode()
 
 
-def test_twelve_variants_map_to_existing_upstream_files(upstream_dirs):
-    cascadia, d2coding = upstream_dirs
-    assert len(VARIANTS) == 12
+def test_four_variants_map_to_existing_upstream_files(upstream_dirs):
+    cascadia, d2coding, juliamono = upstream_dirs
+    assert len(VARIANTS) == 4
     assert all((cascadia / v.latin_file).exists() for v in VARIANTS)
     assert all((d2coding / v.hangul_file).exists() for v in VARIANTS)
+    assert all((juliamono / v.symbols_file).exists() for v in VARIANTS)
 
 
 def test_bold_weights_use_d2coding_bold():
     bold = {v.stem for v in VARIANTS if v.hangul_file.startswith("D2CodingBold")}
-    assert bold == {"SemiBold", "SemiBoldItalic", "Bold", "BoldItalic"}
+    assert bold == {"Bold", "BoldItalic"}
 
 
 def test_rename_regular(built_fonts):
@@ -40,15 +41,6 @@ def test_rename_regular(built_fonts):
     assert _name(font, 16) == "Caskoding"
 
 
-def test_rename_non_ribbi(built_fonts):
-    font = built_fonts["SemiLightItalic"]
-    assert _name(font, 1) == "Caskoding SemiLight"
-    assert _name(font, 2) == "Italic"
-    assert _name(font, 6) == "Caskoding-SemiLightItalic"
-    assert _name(font, 16) == "Caskoding"
-    assert _name(font, 17) == "SemiLight Italic"
-
-
 def test_no_reserved_names_left(built_fonts):
     for font in built_fonts.values():
         for record in font["name"].names:
@@ -59,8 +51,8 @@ def test_no_reserved_names_left(built_fonts):
 
 def test_variant_names_unique(built_fonts):
     fonts = built_fonts.values()
-    assert len({_name(f, 6) for f in fonts}) == 12
-    assert len({(_name(f, 16), _name(f, 17) if f["name"].getName(17, 3, 1, 0x409) else _name(f, 2)) for f in fonts}) == 12
+    assert len({_name(f, 6) for f in fonts}) == 4
+    assert len({(_name(f, 16), _name(f, 17) if f["name"].getName(17, 3, 1, 0x409) else _name(f, 2)) for f in fonts}) == 4
 
 
 def test_bold_hangul_within_line_height(built_fonts):

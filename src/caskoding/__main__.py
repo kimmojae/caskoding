@@ -1,4 +1,4 @@
-"""python -m caskoding: fetch upstream fonts and build all twelve Caskoding styles."""
+"""python -m caskoding: fetch upstream fonts and build all four Caskoding styles."""
 
 import argparse
 from pathlib import Path
@@ -13,9 +13,9 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("fonts"))
     args = parser.parse_args()
 
-    cascadia, d2coding = ensure_upstream()
+    cascadia, d2coding, juliamono = ensure_upstream()
     for variant in VARIANTS:
-        print(build(variant, cascadia, d2coding, args.out))
+        print(build(variant, cascadia, d2coding, juliamono, args.out))
 
 
 if __name__ == "__main__":

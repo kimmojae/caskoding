@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
 
+from caskoding.variants import VARIANTS
+
 
 @dataclass(frozen=True)
 class Source:
@@ -21,7 +23,7 @@ class Source:
 CASCADIA = Source(
     url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/CascadiaMono.tar.xz",
     sha256="e4fe0248bbe2558e907d26b55ed287403972f946239a4ea3f7a8afd3365ad6ba",
-    members=("CaskaydiaMonoNerdFontMono-*.ttf", "LICENSE"),
+    members=(*(v.latin_file for v in VARIANTS), "LICENSE"),
     subdir="cascadia",
 )
 
@@ -30,6 +32,13 @@ D2CODING = Source(
     sha256="17e2da5e2879006eb725b87943f7988736ef8b6c9f8b84bc8e3bdbcb8dd46744",
     members=("D2Coding/*.ttf", "OFL.txt"),
     subdir="d2coding",
+)
+
+JULIAMONO = Source(
+    url="https://github.com/cormullion/juliamono/releases/download/v0.63.2/JuliaMono-ttf.zip",
+    sha256="bc7140ccf1cbd84ee66a4c00a41628ee0a531a241e521773bad25a10c5066795",
+    members=(*(v.symbols_file for v in VARIANTS), "LICENSE"),
+    subdir="juliamono",
 )
 
 
@@ -75,10 +84,11 @@ def extract(source: Source, archive: Path, upstream_dir: Path) -> Path:
     return out
 
 
-def ensure_upstream(upstream_dir: Path = Path("upstream")) -> tuple[Path, Path]:
-    """Fetch and unpack both upstream fonts; return (cascadia_dir, d2coding_dir)."""
+def ensure_upstream(upstream_dir: Path = Path("upstream")) -> tuple[Path, Path, Path]:
+    """Fetch and unpack the upstream fonts; return (cascadia_dir, d2coding_dir, juliamono_dir)."""
     cache = upstream_dir / "archives"
-    cascadia, d2coding = (
-        extract(source, fetch(source, cache), upstream_dir) for source in (CASCADIA, D2CODING)
+    cascadia, d2coding, juliamono = (
+        extract(source, fetch(source, cache), upstream_dir)
+        for source in (CASCADIA, D2CODING, JULIAMONO)
     )
-    return cascadia, d2coding
+    return cascadia, d2coding, juliamono
