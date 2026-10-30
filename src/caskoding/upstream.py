@@ -34,13 +34,6 @@ D2CODING = Source(
     subdir="d2coding",
 )
 
-JULIAMONO = Source(
-    url="https://github.com/cormullion/juliamono/releases/download/v0.63.2/JuliaMono-ttf.zip",
-    sha256="bc7140ccf1cbd84ee66a4c00a41628ee0a531a241e521773bad25a10c5066795",
-    members=(*(v.symbols_file for v in VARIANTS), "LICENSE"),
-    subdir="juliamono",
-)
-
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -84,11 +77,10 @@ def extract(source: Source, archive: Path, upstream_dir: Path) -> Path:
     return out
 
 
-def ensure_upstream(upstream_dir: Path = Path("upstream")) -> tuple[Path, Path, Path]:
-    """Fetch and unpack the upstream fonts; return (cascadia_dir, d2coding_dir, juliamono_dir)."""
+def ensure_upstream(upstream_dir: Path = Path("upstream")) -> tuple[Path, Path]:
+    """Fetch and unpack the upstream fonts; return (cascadia_dir, d2coding_dir)."""
     cache = upstream_dir / "archives"
-    cascadia, d2coding, juliamono = (
-        extract(source, fetch(source, cache), upstream_dir)
-        for source in (CASCADIA, D2CODING, JULIAMONO)
+    cascadia, d2coding = (
+        extract(source, fetch(source, cache), upstream_dir) for source in (CASCADIA, D2CODING)
     )
-    return cascadia, d2coding, juliamono
+    return cascadia, d2coding

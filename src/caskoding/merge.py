@@ -1,4 +1,4 @@
-"""Fill a CaskaydiaMono font's gaps from JuliaMono (symbols) and D2Coding (Hangul, CJK) at terminal width."""
+"""Fill a CaskaydiaMono font's gaps from D2Coding (Hangul, CJK, symbols) at terminal width."""
 
 import unicodedata
 
@@ -19,15 +19,6 @@ VERSION = "0.1.0"
 # Longest first, so "CaskaydiaMono NFM" does not eat the start of the full name.
 UPSTREAM_FAMILY_NAMES = ("CaskaydiaMono Nerd Font Mono", "CaskaydiaMono NFM", "CaskaydiaMonoNFM")
 
-OS2_RANGE_FIELDS = (
-    "ulUnicodeRange1",
-    "ulUnicodeRange2",
-    "ulUnicodeRange3",
-    "ulUnicodeRange4",
-    "ulCodePageRange1",
-    "ulCodePageRange2",
-)
-
 
 def _terminal_cells(cp: int) -> int:
     """How many cells a terminal gives `cp`: two for East Asian Wide/Fullwidth, else one."""
@@ -38,39 +29,38 @@ def _fillable(cp: int, latin_cmap: dict) -> bool:
     return cp not in latin_cmap and unicodedata.category(chr(cp)) not in SKIPPED_CATEGORIES
 
 
-def merge_symbols(latin: TTFont, symbols: TTFont) -> int:
-    """Fill Cascadia's one-cell gaps from JuliaMono in place; return how many were added.
-
-    Two-cell codepoints are left for D2Coding, whose Hangul and Hanja they sit beside.
-    """
-    latin_cmap, symbols_cmap = latin.getBestCmap(), symbols.getBestCmap()
-    codepoints = [
-        cp for cp in sorted(symbols_cmap) if _fillable(cp, latin_cmap) and _terminal_cells(cp) == 1
-    ]
-    added = _copy_centred(latin, symbols, codepoints)
-    _register(latin, added)
-    return len(added)
-
-
 def merge_d2coding(latin: TTFont, d2coding: TTFont) -> int:
     """Fill glyphs still missing from D2Coding in place; return how many were added.
 
     Hangul is fitted as a block into two cells. Every other D2Coding glyph follows
     if its D2Coding width matches the terminal's: D2Coding draws ambiguous-width
     characters (①, ※, ○, …) two cells wide while terminals give them one, so
-    those would overlap their neighbour.
+    those would overlap their neighbour. So would the few whose ink runs past
+    their advance (the hooks of Ɓ, Ɗ, Ƥ), and they are skipped too.
+
+    Cascadia's OS/2 Unicode and code page ranges are kept as they are. Adding
+    D2Coding's Korean bits makes macOS fall back to a Korean font for glyphs
+    neither font has (⎿, ⏺), and that font draws them wrong; with Latin ranges
+    it picks the same fonts it would for CaskaydiaMono alone.
     """
     latin_cmap, d2_cmap = latin.getBestCmap(), d2coding.getBestCmap()
-    d2_glyphs, d2_hmtx = d2coding.getGlyphSet(), d2coding["hmtx"]
+    d2_glyphs, d2_glyf, d2_hmtx = d2coding.getGlyphSet(), d2coding["glyf"], d2coding["hmtx"]
     d2_upm = d2coding["head"].unitsPerEm
     hangul = {cp for lo, hi in HANGUL_RANGES for cp in range(lo, hi + 1)}
     hangul_codepoints = [cp for cp in sorted(hangul) if cp in d2_cmap and cp not in latin_cmap]
+
+    def fits_cell(name: str) -> bool:
+        glyph = d2_glyf[name]
+        glyph.recalcBounds(d2_glyf)
+        return getattr(glyph, "xMin", 0) >= 0 and getattr(glyph, "xMax", 0) <= d2_hmtx[name][0]
+
     other_codepoints = [
         cp
         for cp in sorted(d2_cmap)
         if cp not in hangul
         and _fillable(cp, latin_cmap)
         and d2_hmtx[d2_cmap[cp]][0] * 2 == _terminal_cells(cp) * d2_upm
+        and fits_cell(d2_cmap[cp])
     ]
 
     scale = _scale(latin, d2coding)
@@ -93,10 +83,6 @@ def merge_d2coding(latin: TTFont, d2coding: TTFont) -> int:
     # Wide glyphs (Hanja, CJK punctuation) share Hangul's vertical shift.
     added |= _copy_centred(latin, d2coding, other_codepoints, wide_dy=dy)
     _register(latin, added)
-
-    latin_os2, d2_os2 = latin["OS/2"], d2coding["OS/2"]
-    for field in OS2_RANGE_FIELDS:
-        setattr(latin_os2, field, getattr(latin_os2, field) | getattr(d2_os2, field))
     hhea.advanceWidthMax = max(hhea.advanceWidthMax, wide)
     return len(added)
 
@@ -171,7 +157,6 @@ def rename(font: TTFont, variant: Variant) -> None:
         if record.nameID == 0:
             text += (
                 "\nHangul and fallback glyphs © 2015 NAVER Corporation (D2Coding)."
-                "\nSymbol glyphs © 2020-2023 cormullion (JuliaMono)."
             )
         elif record.nameID == 3:
             text = f"{FAMILY} {variant.style} {VERSION}"

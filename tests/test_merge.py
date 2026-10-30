@@ -2,7 +2,6 @@ from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.recordingPen import RecordingPen
 from fontTools.ttLib import TTFont
 
-from caskoding.merge import merge_d2coding, merge_symbols
 from caskoding.variants import Variant
 
 REGULAR = Variant("Regular", italic=False)
@@ -64,14 +63,14 @@ def test_hangul_centred_in_cell(merged_regular):
     assert abs(left - right) <= 2
 
 
-def test_fills_terminal_ui_symbols_at_one_cell(merged_regular):
+def test_fills_d2coding_symbols_at_one_cell(merged_regular):
     hmtx, cmap = merged_regular["hmtx"], merged_regular.getBestCmap()
-    for ch in "⎿⏺⏵⏸⏴⧉✻✳✶✢✽↯⚠✔✗✘①※○":
+    for ch in "⚠✔✗✘":
         assert hmtx[cmap[ord(ch)]][0] == 1200, ch
 
 
 def test_symbols_keep_baseline_and_proportion(merged_regular, upstream_dirs):
-    original = TTFont(upstream_dirs[2] / REGULAR.symbols_file)
+    original = TTFont(upstream_dirs[1] / REGULAR.hangul_file)
 
     def bounds(font):
         (b,) = _ink_bounds(font, [ord("✔")])
@@ -82,25 +81,16 @@ def test_symbols_keep_baseline_and_proportion(merged_regular, upstream_dirs):
     assert abs((merged_b[3] - merged_b[1]) - (original_b[3] - original_b[1])) <= 0.01
 
 
-def test_symbols_take_precedence_over_d2coding(upstream_dirs):
-    cascadia, d2coding, juliamono = upstream_dirs
-    font = TTFont(cascadia / REGULAR.latin_file)
-    merge_symbols(font, TTFont(juliamono / REGULAR.symbols_file))
-    name = font.getBestCmap()[ord("✔")]
-    before = RecordingPen()
-    font.getGlyphSet()[name].draw(before)
-
-    merge_d2coding(font, TTFont(d2coding / REGULAR.hangul_file))
-    after = RecordingPen()
-    font.getGlyphSet()[font.getBestCmap()[ord("✔")]].draw(after)
-    assert after.value == before.value
+def test_leaves_glyphs_neither_font_has_to_the_system(merged_regular):
+    cmap = merged_regular.getBestCmap()
+    assert ord("⎿") not in cmap and ord("⏺") not in cmap
 
 
-def test_symbols_outside_bmp_only_in_full_cmap(merged_regular):
-    cp = 0x1D400  # MATHEMATICAL BOLD CAPITAL A
-    for table in merged_regular["cmap"].tables:
-        if table.isUnicode() and table.format != 14:
-            assert (cp in table.cmap) == (table.format == 12)
+def test_keeps_cascadia_language_ranges(merged_regular, upstream_dirs):
+    # Korean code page bits would make macOS draw ⎿ and ⏺ from a Korean font.
+    original = TTFont(upstream_dirs[0] / REGULAR.latin_file)
+    for field in ("ulUnicodeRange1", "ulUnicodeRange2", "ulCodePageRange1", "ulCodePageRange2"):
+        assert getattr(merged_regular["OS/2"], field) == getattr(original["OS/2"], field), field
 
 
 def test_fills_wide_cjk_at_two_cells(merged_regular):
@@ -113,20 +103,16 @@ def test_skips_width_mismatch_and_private_use(merged_regular, upstream_dirs):
     original = TTFont(upstream_dirs[1] / REGULAR.hangul_file)
     cmap, latin = merged_regular.getBestCmap(), TTFont(upstream_dirs[0] / REGULAR.latin_file)
     # D2Coding draws ① two cells wide, but terminals give it one, so it never comes
-    # from D2Coding; JuliaMono supplies it at one cell instead.
+    # from D2Coding.
     assert 0x2460 in original.getBestCmap()
-    assert merged_regular["hmtx"][cmap[0x2460]][0] == 1200
+    assert 0x2460 not in cmap
     d2_private = [cp for cp in original.getBestCmap() if 0xE000 <= cp <= 0xF8FF]
     latin_cmap = latin.getBestCmap()
     assert all(cmap.get(cp) == latin_cmap.get(cp) for cp in d2_private)
 
 
 def test_d2coding_fallback_ink_within_cell(merged_regular, upstream_dirs):
-    # JuliaMono glyphs are copied as designed (stacked accents may rise above the
-    # line), so only check what D2Coding supplied.
-    cascadia, _, juliamono = upstream_dirs
-    skip = set(TTFont(cascadia / REGULAR.latin_file).getBestCmap())
-    skip |= set(TTFont(juliamono / REGULAR.symbols_file).getBestCmap())
+    skip = set(TTFont(upstream_dirs[0] / REGULAR.latin_file).getBestCmap())
     cmap, hmtx = merged_regular.getBestCmap(), merged_regular["hmtx"]
     added = [cp for cp in cmap if cp not in skip and not 0xAC00 <= cp <= 0xD7A3]
     for cp, bounds in zip(added, _ink_bounds(merged_regular, added)):

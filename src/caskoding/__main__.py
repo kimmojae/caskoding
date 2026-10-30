@@ -13,9 +13,9 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("fonts"))
     args = parser.parse_args()
 
-    cascadia, d2coding, juliamono = ensure_upstream()
+    cascadia, d2coding = ensure_upstream()
     for variant in VARIANTS:
-        print(build(variant, cascadia, d2coding, juliamono, args.out))
+        print(build(variant, cascadia, d2coding, args.out))
 
 
 if __name__ == "__main__":

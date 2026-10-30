@@ -4,7 +4,7 @@
 
 **영문은 Cascadia, 한글은 D2Coding. 한 폰트 안에서 정확히 두 칸.**
 
-CaskaydiaMono Nerd Font에 D2Coding 한글을 합치고, 빠진 기호는 JuliaMono로 채운 터미널용 고정폭 폰트입니다.
+CaskaydiaMono Nerd Font에 D2Coding 한글을 합친 터미널용 고정폭 폰트입니다.
 
 [![License: OFL 1.1](https://img.shields.io/badge/license-OFL_1.1-4c8bf5?style=flat-square)](LICENSE)
 [![Nerd Fonts v3.5.1](https://img.shields.io/badge/Nerd_Fonts-v3.5.1-82aaff?style=flat-square)](https://github.com/ryanoasis/nerd-fonts)
@@ -26,7 +26,7 @@ CaskaydiaMono Nerd Font에 D2Coding 한글을 합치고, 빠진 기호는 JuliaM
 |---|---|
 | **한글 두 칸, 영문 한 칸** | 한글이 정확히 영문 두 글자 폭이라 표와 정렬이 어긋나지 않습니다. |
 | **Nerd Font 아이콘 그대로** | 프롬프트, 파일 아이콘, Powerline 기호를 CaskaydiaMono 그대로 씁니다. |
-| **빠진 기호 채움** | `⎿ ⏺ ✔ ⚠ ①` 같은 기호도 다른 폰트로 넘어가지 않고 같은 결로 그립니다. |
+| **기호는 자연스럽게** | `✔ ✘ ⚠` 같은 기호는 D2Coding으로, 두 폰트에 모두 없는 `⎿ ⏺`는 macOS가 영문 폰트에 붙여 쓰던 그대로 그립니다. |
 | **4가지 스타일** | Regular, Bold, Italic, BoldItalic. 터미널과 에디터가 쓰는 조합을 모두 갖췄습니다. |
 
 ## 설치
@@ -40,6 +40,9 @@ make install
 ```
 
 `make install`은 원본 폰트를 내려받아 빌드한 뒤 `~/Library/Fonts`에 복사합니다.
+
+> [!IMPORTANT]
+> macOS에서만 테스트했습니다. 폰트에 없는 기호를 어떤 폰트로 그릴지는 운영체제가 정하므로, 다른 운영체제에서는 기호가 다르게 보일 수 있습니다.
 
 | 명령 | 하는 일 |
 |---|---|
@@ -84,22 +87,21 @@ Settings → Profiles → Text → Font에서 `Caskoding`을 고릅니다.
 
 ```mermaid
 flowchart LR
-    A["CaskaydiaMono Nerd Font<br/>영문 · 숫자 · 기호 · 아이콘"] --> B["JuliaMono<br/>그 밖의 한 칸 기호"] --> C["D2Coding<br/>한글 · 한자 · CJK 문장부호"]
+    A["CaskaydiaMono Nerd Font<br/>영문 · 숫자 · 기호 · 아이콘"] --> B["D2Coding<br/>한글 · 한자 · 그 밖의 기호"] --> C["macOS<br/>두 폰트에 없는 글자"]
 ```
 
 | 부분 | 원본 | 버전 |
 |---|---|---|
 | 영문, 기호, 아이콘 | [CaskaydiaMono Nerd Font Mono](https://github.com/ryanoasis/nerd-fonts) (Cascadia Mono 기반) | Nerd Fonts v3.5.1 |
-| 그 밖의 한 칸 기호 (`⎿ ⏺ ✔ ⚠ ①`, 화살표, 수학 기호 등) | [JuliaMono](https://github.com/cormullion/juliamono) | 0.63.2 |
-| 한글 (완성형 11,172자, 호환 자모), 한자, CJK 문장부호 | [D2Coding](https://github.com/naver/d2-coding-font) | 1.4.0 |
+| 한글 (완성형 11,172자, 호환 자모), 한자, CJK 문장부호, 그 밖의 기호 (`✔ ✘ ⚠` 등) | [D2Coding](https://github.com/naver/d2-coding-font) | 1.4.0 |
 
 원본은 빌드할 때 공식 릴리스에서 내려받으며, 체크섬으로 확인합니다.
 
 <details>
 <summary><b>어떤 글자를 어디서 가져오나요?</b></summary>
 
-- JuliaMono는 터미널에서 한 칸을 차지하는 글자만 채웁니다. Cascadia와 같은 고정폭 산세리프이고, 각 스타일에 가까운 굵기를 씁니다.
-- D2Coding은 두 칸을 차지하는 글자(한글, 한자 등)와 남은 글자를 채웁니다. D2Coding이 두 칸으로 그리는데 터미널은 한 칸으로 다루는 글자는 옆 글자와 겹치므로 D2Coding에서 가져오지 않습니다.
+- D2Coding은 Cascadia에 없는 글자를 채웁니다. 다만 옆 글자와 겹치는 글자는 가져오지 않습니다. D2Coding이 두 칸으로 그리는데 터미널은 한 칸으로 다루는 글자(`① ※ ○` 등)와, 획이 칸 밖으로 나가는 글자가 그렇습니다.
+- 두 폰트에 모두 없는 글자(`⎿ ⏺` 등)는 macOS가 다른 폰트로 그립니다. Caskoding은 Cascadia의 언어 정보를 그대로 두어서, macOS가 CaskaydiaMono를 쓸 때와 같은 영문 계열 폰트를 고릅니다. D2Coding의 한국어 정보까지 넣으면 macOS가 한국어 폰트로 이 기호들을 그려 모양이 어긋납니다.
 - 이모지는 넣지 않습니다. 터미널이 컬러 이모지 폰트로 그립니다.
 
 </details>
@@ -113,10 +115,10 @@ flowchart LR
 
 ## 라이선스
 
-[SIL Open Font License 1.1](LICENSE)입니다. 세 원본도 모두 OFL이며, 원본 라이선스 전문은 [licenses/](licenses/)에 있습니다.
+[SIL Open Font License 1.1](LICENSE)입니다. 두 원본도 모두 OFL이며, 원본 라이선스 전문은 [licenses/](licenses/)에 있습니다.
 
-OFL은 원본의 예약 이름(Reserved Font Name)을 수정본에 쓰지 못하게 합니다. 이 폰트가 "Cascadia Code"나 "D2Coding", "JuliaMono"가 아니라 "Caskoding"이라는 이름을 쓰는 이유입니다.
+OFL은 원본의 예약 이름(Reserved Font Name)을 수정본에 쓰지 못하게 합니다. 이 폰트가 "Cascadia Code"나 "D2Coding"이 아니라 "Caskoding"이라는 이름을 쓰는 이유입니다.
 
 <div align="center">
-<sub>Built on <a href="https://github.com/microsoft/cascadia-code">Cascadia Code</a>, <a href="https://github.com/naver/d2-coding-font">D2Coding</a>, and <a href="https://github.com/cormullion/juliamono">JuliaMono</a>.</sub>
+<sub>Built on <a href="https://github.com/microsoft/cascadia-code">Cascadia Code</a> and <a href="https://github.com/naver/d2-coding-font">D2Coding</a>.</sub>
 </div>

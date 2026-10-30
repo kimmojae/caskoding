@@ -19,11 +19,10 @@ def _name(font: TTFont, name_id: int) -> str:
 
 
 def test_four_variants_map_to_existing_upstream_files(upstream_dirs):
-    cascadia, d2coding, juliamono = upstream_dirs
+    cascadia, d2coding = upstream_dirs
     assert len(VARIANTS) == 4
     assert all((cascadia / v.latin_file).exists() for v in VARIANTS)
     assert all((d2coding / v.hangul_file).exists() for v in VARIANTS)
-    assert all((juliamono / v.symbols_file).exists() for v in VARIANTS)
 
 
 def test_bold_weights_use_d2coding_bold():

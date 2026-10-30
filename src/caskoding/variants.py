@@ -34,10 +34,6 @@ class Variant:
             return "D2CodingBold-Ver1.4.0-20261003.ttf"
         return "D2Coding-Ver1.4.0-20261003.ttf"
 
-    @property
-    def symbols_file(self) -> str:
-        return f"JuliaMono-{self.weight}{'Italic' if self.italic else ''}.ttf"
-
 
 VARIANTS: tuple[Variant, ...] = tuple(
     Variant(weight, italic) for weight in WEIGHTS for italic in (False, True)
